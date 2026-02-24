@@ -9,12 +9,39 @@
 import { IDL } from '@icp-sdk/core/candid';
 
 export const HabitId = IDL.Int;
+export const SubscriptionTier = IDL.Variant({
+  'free' : IDL.Null,
+  'premium_yearly' : IDL.Null,
+  'premium_monthly' : IDL.Null,
+});
+export const PaymentRecord = IDL.Record({
+  'status' : IDL.Text,
+  'userId' : IDL.Principal,
+  'plan' : SubscriptionTier,
+  'currency' : IDL.Text,
+  'paymentId' : IDL.Text,
+  'paymentDate' : IDL.Int,
+  'amount' : IDL.Nat,
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const ShoppingItem = IDL.Record({
+  'productName' : IDL.Text,
+  'currency' : IDL.Text,
+  'quantity' : IDL.Nat,
+  'priceInCents' : IDL.Nat,
+  'productDescription' : IDL.Text,
+});
 export const HabitEntryInput = IDL.Record({
   'targetFrequency' : IDL.Nat,
   'name' : IDL.Text,
   'description' : IDL.Opt(IDL.Text),
   'soundEnabled' : IDL.Bool,
   'reminderTime' : IDL.Opt(IDL.Int),
+  'category' : IDL.Opt(IDL.Text),
 });
 export const UserId = IDL.Principal;
 export const Habit = IDL.Record({
@@ -27,23 +54,111 @@ export const Habit = IDL.Record({
   'description' : IDL.Opt(IDL.Text),
   'soundEnabled' : IDL.Bool,
   'reminderTime' : IDL.Opt(IDL.Int),
+  'category' : IDL.Opt(IDL.Text),
   'streakCount' : IDL.Nat,
+});
+export const StreakRewardType = IDL.Variant({
+  'oneYearPremium' : IDL.Null,
+  'oneMonthPremium' : IDL.Null,
+});
+export const StreakReward = IDL.Record({
+  'earnedDate' : IDL.Int,
+  'isActive' : IDL.Bool,
+  'expirationDate' : IDL.Int,
+  'rewardType' : StreakRewardType,
+  'longestStreak' : IDL.Nat,
+});
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const UserStateView = IDL.Record({
+  'subscription' : SubscriptionTier,
+  'subscriptionEndDate' : IDL.Opt(IDL.Int),
+  'stripeCustomerId' : IDL.Opt(IDL.Text),
+  'subscriptionStartDate' : IDL.Opt(IDL.Int),
+  'paymentRecords' : IDL.Vec(PaymentRecord),
+});
+export const RewardMilestone = IDL.Record({
+  'rewardType' : StreakRewardType,
+  'milestoneDays' : IDL.Nat,
+});
+export const StreakRewardStatus = IDL.Record({
+  'rewardHistory' : IDL.Vec(StreakReward),
+  'activeRewards' : IDL.Vec(StreakReward),
+  'longestStreak' : IDL.Nat,
+  'nextMilestone' : IDL.Opt(RewardMilestone),
+  'currentStreak' : IDL.Nat,
+});
+export const StripeSessionStatus = IDL.Variant({
+  'completed' : IDL.Record({
+    'userPrincipal' : IDL.Opt(IDL.Text),
+    'response' : IDL.Text,
+  }),
+  'failed' : IDL.Record({ 'error' : IDL.Text }),
+});
+export const StripeConfiguration = IDL.Record({
+  'allowedCountries' : IDL.Vec(IDL.Text),
+  'secretKey' : IDL.Text,
+});
+export const http_header = IDL.Record({
+  'value' : IDL.Text,
+  'name' : IDL.Text,
+});
+export const http_request_result = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
+export const TransformationInput = IDL.Record({
+  'context' : IDL.Vec(IDL.Nat8),
+  'response' : http_request_result,
+});
+export const TransformationOutput = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
 });
 
 export const idlService = IDL.Service({
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addHabitGoal' : IDL.Func([HabitId, IDL.Text], [], []),
+  'addPaymentRecord' : IDL.Func([PaymentRecord], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'completeHabit' : IDL.Func([HabitId], [], []),
+  'createCheckoutSession' : IDL.Func(
+      [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+      [IDL.Text],
+      [],
+    ),
   'createHabit' : IDL.Func([HabitEntryInput], [HabitId], []),
   'deleteHabit' : IDL.Func([HabitId], [], []),
+  'exportAllHabitData' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(Habit, IDL.Vec(IDL.Int)))],
+      [],
+    ),
+  'getActiveRewards' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(StreakReward)],
+      ['query'],
+    ),
   'getAllHabits' : IDL.Func([], [IDL.Vec(Habit)], ['query']),
   'getAllHabitsWithStreaks' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(Habit, IDL.Vec(IDL.Int)))],
       ['query'],
     ),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getHabit' : IDL.Func([HabitId], [Habit], ['query']),
+  'getHabitGoal' : IDL.Func([HabitId], [IDL.Opt(IDL.Text)], ['query']),
   'getHabitWithStats' : IDL.Func(
       [HabitId],
       [Habit, IDL.Vec(IDL.Int)],
+      ['query'],
+    ),
+  'getMyPaymentHistory' : IDL.Func([], [IDL.Vec(PaymentRecord)], ['query']),
+  'getMySubscriptionDetails' : IDL.Func(
+      [],
+      [IDL.Opt(UserStateView)],
       ['query'],
     ),
   'getRecentCompletions' : IDL.Func(
@@ -51,19 +166,83 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Int)],
       ['query'],
     ),
+  'getStreakRewardStatus' : IDL.Func(
+      [IDL.Principal],
+      [StreakRewardStatus],
+      ['query'],
+    ),
+  'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+  'getSubscriptionTier' : IDL.Func(
+      [IDL.Principal],
+      [SubscriptionTier],
+      ['query'],
+    ),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isPremiumUser' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
+  'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+  'transform' : IDL.Func(
+      [TransformationInput],
+      [TransformationOutput],
+      ['query'],
+    ),
   'updateHabit' : IDL.Func([HabitId, HabitEntryInput], [], []),
+  'updateSubscription' : IDL.Func(
+      [
+        IDL.Principal,
+        SubscriptionTier,
+        IDL.Opt(IDL.Text),
+        IDL.Opt(IDL.Int),
+        IDL.Opt(IDL.Int),
+      ],
+      [],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
   const HabitId = IDL.Int;
+  const SubscriptionTier = IDL.Variant({
+    'free' : IDL.Null,
+    'premium_yearly' : IDL.Null,
+    'premium_monthly' : IDL.Null,
+  });
+  const PaymentRecord = IDL.Record({
+    'status' : IDL.Text,
+    'userId' : IDL.Principal,
+    'plan' : SubscriptionTier,
+    'currency' : IDL.Text,
+    'paymentId' : IDL.Text,
+    'paymentDate' : IDL.Int,
+    'amount' : IDL.Nat,
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const ShoppingItem = IDL.Record({
+    'productName' : IDL.Text,
+    'currency' : IDL.Text,
+    'quantity' : IDL.Nat,
+    'priceInCents' : IDL.Nat,
+    'productDescription' : IDL.Text,
+  });
   const HabitEntryInput = IDL.Record({
     'targetFrequency' : IDL.Nat,
     'name' : IDL.Text,
     'description' : IDL.Opt(IDL.Text),
     'soundEnabled' : IDL.Bool,
     'reminderTime' : IDL.Opt(IDL.Int),
+    'category' : IDL.Opt(IDL.Text),
   });
   const UserId = IDL.Principal;
   const Habit = IDL.Record({
@@ -76,23 +255,108 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Opt(IDL.Text),
     'soundEnabled' : IDL.Bool,
     'reminderTime' : IDL.Opt(IDL.Int),
+    'category' : IDL.Opt(IDL.Text),
     'streakCount' : IDL.Nat,
+  });
+  const StreakRewardType = IDL.Variant({
+    'oneYearPremium' : IDL.Null,
+    'oneMonthPremium' : IDL.Null,
+  });
+  const StreakReward = IDL.Record({
+    'earnedDate' : IDL.Int,
+    'isActive' : IDL.Bool,
+    'expirationDate' : IDL.Int,
+    'rewardType' : StreakRewardType,
+    'longestStreak' : IDL.Nat,
+  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const UserStateView = IDL.Record({
+    'subscription' : SubscriptionTier,
+    'subscriptionEndDate' : IDL.Opt(IDL.Int),
+    'stripeCustomerId' : IDL.Opt(IDL.Text),
+    'subscriptionStartDate' : IDL.Opt(IDL.Int),
+    'paymentRecords' : IDL.Vec(PaymentRecord),
+  });
+  const RewardMilestone = IDL.Record({
+    'rewardType' : StreakRewardType,
+    'milestoneDays' : IDL.Nat,
+  });
+  const StreakRewardStatus = IDL.Record({
+    'rewardHistory' : IDL.Vec(StreakReward),
+    'activeRewards' : IDL.Vec(StreakReward),
+    'longestStreak' : IDL.Nat,
+    'nextMilestone' : IDL.Opt(RewardMilestone),
+    'currentStreak' : IDL.Nat,
+  });
+  const StripeSessionStatus = IDL.Variant({
+    'completed' : IDL.Record({
+      'userPrincipal' : IDL.Opt(IDL.Text),
+      'response' : IDL.Text,
+    }),
+    'failed' : IDL.Record({ 'error' : IDL.Text }),
+  });
+  const StripeConfiguration = IDL.Record({
+    'allowedCountries' : IDL.Vec(IDL.Text),
+    'secretKey' : IDL.Text,
+  });
+  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const http_request_result = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
+  const TransformationInput = IDL.Record({
+    'context' : IDL.Vec(IDL.Nat8),
+    'response' : http_request_result,
+  });
+  const TransformationOutput = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
   });
   
   return IDL.Service({
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addHabitGoal' : IDL.Func([HabitId, IDL.Text], [], []),
+    'addPaymentRecord' : IDL.Func([PaymentRecord], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'completeHabit' : IDL.Func([HabitId], [], []),
+    'createCheckoutSession' : IDL.Func(
+        [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+        [IDL.Text],
+        [],
+      ),
     'createHabit' : IDL.Func([HabitEntryInput], [HabitId], []),
     'deleteHabit' : IDL.Func([HabitId], [], []),
+    'exportAllHabitData' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(Habit, IDL.Vec(IDL.Int)))],
+        [],
+      ),
+    'getActiveRewards' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(StreakReward)],
+        ['query'],
+      ),
     'getAllHabits' : IDL.Func([], [IDL.Vec(Habit)], ['query']),
     'getAllHabitsWithStreaks' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(Habit, IDL.Vec(IDL.Int)))],
         ['query'],
       ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getHabit' : IDL.Func([HabitId], [Habit], ['query']),
+    'getHabitGoal' : IDL.Func([HabitId], [IDL.Opt(IDL.Text)], ['query']),
     'getHabitWithStats' : IDL.Func(
         [HabitId],
         [Habit, IDL.Vec(IDL.Int)],
+        ['query'],
+      ),
+    'getMyPaymentHistory' : IDL.Func([], [IDL.Vec(PaymentRecord)], ['query']),
+    'getMySubscriptionDetails' : IDL.Func(
+        [],
+        [IDL.Opt(UserStateView)],
         ['query'],
       ),
     'getRecentCompletions' : IDL.Func(
@@ -100,7 +364,44 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Int)],
         ['query'],
       ),
+    'getStreakRewardStatus' : IDL.Func(
+        [IDL.Principal],
+        [StreakRewardStatus],
+        ['query'],
+      ),
+    'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+    'getSubscriptionTier' : IDL.Func(
+        [IDL.Principal],
+        [SubscriptionTier],
+        ['query'],
+      ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isPremiumUser' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
+    'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+    'transform' : IDL.Func(
+        [TransformationInput],
+        [TransformationOutput],
+        ['query'],
+      ),
     'updateHabit' : IDL.Func([HabitId, HabitEntryInput], [], []),
+    'updateSubscription' : IDL.Func(
+        [
+          IDL.Principal,
+          SubscriptionTier,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Int),
+          IDL.Opt(IDL.Int),
+        ],
+        [],
+        [],
+      ),
   });
 };
 

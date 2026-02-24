@@ -15,8 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, Flame, MoreVertical, Pencil, Trash2, Volume2, VolumeX } from "lucide-react";
-import type { Habit } from "../backend.d";
+import { Check, Flame, MoreVertical, Pencil, Trash2, Volume2, VolumeX, Tag } from "lucide-react";
+import type { Habit, RewardMilestone } from "../backend.d";
+import { StreakRewardProgress } from "./StreakRewardProgress";
 
 interface HabitCardProps {
   habit: Habit;
@@ -25,6 +26,7 @@ interface HabitCardProps {
   onEdit: () => void;
   onDelete: () => void;
   isCompleting?: boolean;
+  nextMilestone?: RewardMilestone;
 }
 
 export function HabitCard({
@@ -34,6 +36,7 @@ export function HabitCard({
   onEdit,
   onDelete,
   isCompleting = false,
+  nextMilestone,
 }: HabitCardProps) {
   const [showRipple, setShowRipple] = useState(false);
   const [isCelebrating, setIsCelebrating] = useState(false);
@@ -141,6 +144,19 @@ export function HabitCard({
           <Progress value={completionPercent} className="h-2" />
         </div>
 
+        {/* Streak Reward Progress */}
+        {nextMilestone && streak > 0 && (
+          <StreakRewardProgress
+            currentStreak={streak}
+            nextMilestone={Number(nextMilestone.milestoneDays)}
+            rewardType={
+              nextMilestone.rewardType === "oneMonthPremium"
+                ? "1 Month Premium"
+                : "1 Year Premium"
+            }
+          />
+        )}
+
         {/* Check-in Button */}
         <Button
           onClick={handleComplete}
@@ -157,16 +173,25 @@ export function HabitCard({
           {completedToday ? "Completed Today!" : "Complete"}
         </Button>
 
-        {/* Reminder Badge */}
-        {habit.reminderTime && (
-          <Badge variant="outline" className="w-fit">
-            Reminder:{" "}
-            {new Date(Number(habit.reminderTime) / 1_000_000).toLocaleTimeString(
-              [],
-              { hour: "2-digit", minute: "2-digit" }
-            )}
-          </Badge>
-        )}
+        {/* Category & Reminder Badges */}
+        <div className="flex flex-wrap gap-2">
+          {habit.category && (
+            <Badge variant="secondary" className="w-fit">
+              <Tag className="mr-1 h-3 w-3" />
+              {habit.category}
+            </Badge>
+          )}
+          
+          {habit.reminderTime && (
+            <Badge variant="outline" className="w-fit">
+              Reminder:{" "}
+              {new Date(Number(habit.reminderTime) / 1_000_000).toLocaleTimeString(
+                [],
+                { hour: "2-digit", minute: "2-digit" }
+              )}
+            </Badge>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

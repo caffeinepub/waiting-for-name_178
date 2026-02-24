@@ -31,6 +31,7 @@ export function HabitFormDialog({
 }: HabitFormDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [targetFrequency, setTargetFrequency] = useState("7");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(false);
@@ -40,6 +41,7 @@ export function HabitFormDialog({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description || "");
+      setCategory(habit.category || "");
       setTargetFrequency(habit.targetFrequency.toString());
       setSoundEnabled(habit.soundEnabled);
       
@@ -57,6 +59,7 @@ export function HabitFormDialog({
       // Reset for new habit
       setName("");
       setDescription("");
+      setCategory("");
       setTargetFrequency("7");
       setSoundEnabled(true);
       setReminderEnabled(false);
@@ -78,6 +81,7 @@ export function HabitFormDialog({
     onSubmit({
       name: name.trim(),
       description: description.trim() || undefined,
+      category: category.trim() || undefined,
       targetFrequency: BigInt(targetFrequency),
       soundEnabled,
       reminderTime: reminderTimeNanos,
@@ -127,6 +131,20 @@ export function HabitFormDialog({
                 placeholder="What does this habit mean to you?"
                 rows={3}
                 className="resize-none"
+              />
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category" className="text-base font-medium">
+                Category
+              </Label>
+              <Input
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g., Health, Productivity, Learning"
+                className="text-base"
               />
             </div>
 

@@ -20,6 +20,7 @@ export interface Habit {
   'description' : [] | [string],
   'soundEnabled' : boolean,
   'reminderTime' : [] | [bigint],
+  'category' : [] | [string],
   'streakCount' : bigint,
 }
 export interface HabitEntryInput {
@@ -28,19 +29,122 @@ export interface HabitEntryInput {
   'description' : [] | [string],
   'soundEnabled' : boolean,
   'reminderTime' : [] | [bigint],
+  'category' : [] | [string],
 }
 export type HabitId = bigint;
+export interface PaymentRecord {
+  'status' : string,
+  'userId' : Principal,
+  'plan' : SubscriptionTier,
+  'currency' : string,
+  'paymentId' : string,
+  'paymentDate' : bigint,
+  'amount' : bigint,
+}
+export interface RewardMilestone {
+  'rewardType' : StreakRewardType,
+  'milestoneDays' : bigint,
+}
+export interface ShoppingItem {
+  'productName' : string,
+  'currency' : string,
+  'quantity' : bigint,
+  'priceInCents' : bigint,
+  'productDescription' : string,
+}
+export interface StreakReward {
+  'earnedDate' : bigint,
+  'isActive' : boolean,
+  'expirationDate' : bigint,
+  'rewardType' : StreakRewardType,
+  'longestStreak' : bigint,
+}
+export interface StreakRewardStatus {
+  'rewardHistory' : Array<StreakReward>,
+  'activeRewards' : Array<StreakReward>,
+  'longestStreak' : bigint,
+  'nextMilestone' : [] | [RewardMilestone],
+  'currentStreak' : bigint,
+}
+export type StreakRewardType = { 'oneYearPremium' : null } |
+  { 'oneMonthPremium' : null };
+export interface StripeConfiguration {
+  'allowedCountries' : Array<string>,
+  'secretKey' : string,
+}
+export type StripeSessionStatus = {
+    'completed' : { 'userPrincipal' : [] | [string], 'response' : string }
+  } |
+  { 'failed' : { 'error' : string } };
+export type SubscriptionTier = { 'free' : null } |
+  { 'premium_yearly' : null } |
+  { 'premium_monthly' : null };
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export type UserId = Principal;
+export interface UserProfile { 'name' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export interface UserStateView {
+  'subscription' : SubscriptionTier,
+  'subscriptionEndDate' : [] | [bigint],
+  'stripeCustomerId' : [] | [string],
+  'subscriptionStartDate' : [] | [bigint],
+  'paymentRecords' : Array<PaymentRecord>,
+}
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface _SERVICE {
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addHabitGoal' : ActorMethod<[HabitId, string], undefined>,
+  'addPaymentRecord' : ActorMethod<[PaymentRecord], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'completeHabit' : ActorMethod<[HabitId], undefined>,
+  'createCheckoutSession' : ActorMethod<
+    [Array<ShoppingItem>, string, string],
+    string
+  >,
   'createHabit' : ActorMethod<[HabitEntryInput], HabitId>,
   'deleteHabit' : ActorMethod<[HabitId], undefined>,
+  'exportAllHabitData' : ActorMethod<[], Array<[Habit, Array<bigint>]>>,
+  'getActiveRewards' : ActorMethod<[Principal], Array<StreakReward>>,
   'getAllHabits' : ActorMethod<[], Array<Habit>>,
   'getAllHabitsWithStreaks' : ActorMethod<[], Array<[Habit, Array<bigint>]>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getHabit' : ActorMethod<[HabitId], Habit>,
+  'getHabitGoal' : ActorMethod<[HabitId], [] | [string]>,
   'getHabitWithStats' : ActorMethod<[HabitId], [Habit, Array<bigint>]>,
+  'getMyPaymentHistory' : ActorMethod<[], Array<PaymentRecord>>,
+  'getMySubscriptionDetails' : ActorMethod<[], [] | [UserStateView]>,
   'getRecentCompletions' : ActorMethod<[HabitId, bigint], Array<bigint>>,
+  'getStreakRewardStatus' : ActorMethod<[Principal], StreakRewardStatus>,
+  'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getSubscriptionTier' : ActorMethod<[Principal], SubscriptionTier>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isPremiumUser' : ActorMethod<[Principal], boolean>,
+  'isStripeConfigured' : ActorMethod<[], boolean>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updateHabit' : ActorMethod<[HabitId, HabitEntryInput], undefined>,
+  'updateSubscription' : ActorMethod<
+    [Principal, SubscriptionTier, [] | [string], [] | [bigint], [] | [bigint]],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

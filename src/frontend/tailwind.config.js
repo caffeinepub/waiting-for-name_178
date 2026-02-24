@@ -37,6 +37,10 @@ export default {
           DEFAULT: "oklch(var(--success) / <alpha-value>)",
           foreground: "oklch(var(--success-foreground))",
         },
+        reward: {
+          DEFAULT: "oklch(var(--reward) / <alpha-value>)",
+          foreground: "oklch(var(--reward-foreground))",
+        },
         destructive: {
           DEFAULT: "oklch(var(--destructive) / <alpha-value>)",
           foreground: "oklch(var(--destructive-foreground))",
@@ -92,10 +96,15 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        shine: {
+          "0%": { "background-position": "-200% center" },
+          "100%": { "background-position": "200% center" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shine: "shine 3s linear infinite",
       },
     },
   },

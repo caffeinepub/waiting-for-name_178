@@ -14,6 +14,10 @@
     --success: 0.72 0.14 155;
     --success-foreground: 0.12 0.02 155;
 
+    /* Golden reward color for milestones */
+    --reward: 0.75 0.15 55;
+    --reward-foreground: 0.12 0.02 55;
+
     /* Light cream background with soft charcoal text */
     --background: 0.97 0.01 55;
     --foreground: 0.22 0.03 35;
@@ -59,6 +63,10 @@
 
     --success: 0.68 0.12 155;
     --success-foreground: 0.95 0.01 155;
+
+    /* Golden reward color for milestones */
+    --reward: 0.70 0.13 55;
+    --reward-foreground: 0.95 0.01 55;
 
     --background: 0.14 0.02 35;
     --foreground: 0.95 0.01 55;
@@ -141,6 +149,15 @@
     }
     75% {
       transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  @keyframes shine {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
     }
   }
 
