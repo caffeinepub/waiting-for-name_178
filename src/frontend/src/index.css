@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Energetic coral/orange as primary - warm and motivating */
+    --primary: 0.68 0.18 35;
+    --primary-foreground: 0.98 0.01 35;
+
+    /* Fresh mint green for success/completion */
+    --success: 0.72 0.14 155;
+    --success-foreground: 0.12 0.02 155;
+
+    /* Light cream background with soft charcoal text */
+    --background: 0.97 0.01 55;
+    --foreground: 0.22 0.03 35;
+
+    --card: 0.99 0.005 55;
+    --card-foreground: 0.22 0.03 35;
+
+    --muted: 0.92 0.01 55;
+    --muted-foreground: 0.52 0.02 35;
+
+    --accent: 0.94 0.02 45;
+    --accent-foreground: 0.22 0.03 35;
+
+    /* Bright secondary for badges */
+    --secondary: 0.82 0.12 275;
+    --secondary-foreground: 0.98 0.01 275;
+
+    /* Destructive red */
+    --destructive: 0.58 0.22 25;
+    --destructive-foreground: 0.98 0.01 25;
+
+    --border: 0.88 0.02 55;
+    --input: 0.88 0.02 55;
+    --ring: 0.68 0.18 35;
+
+    --popover: 0.99 0.01 55;
+    --popover-foreground: 0.18 0.03 35;
+
+    --radius: 1rem;
+
+    /* Chart colors for stats */
+    --chart-1: 0.68 0.18 35;
+    --chart-2: 0.72 0.14 155;
+    --chart-3: 0.82 0.12 275;
+    --chart-4: 0.75 0.15 195;
+    --chart-5: 0.65 0.16 55;
+  }
+
+  .dark {
+    /* Dark mode - deep charcoal with warm accents */
+    --primary: 0.72 0.16 35;
+    --primary-foreground: 0.12 0.02 35;
+
+    --success: 0.68 0.12 155;
+    --success-foreground: 0.95 0.01 155;
+
+    --background: 0.14 0.02 35;
+    --foreground: 0.95 0.01 55;
+
+    --card: 0.18 0.02 35;
+    --card-foreground: 0.95 0.01 55;
+
+    --muted: 0.24 0.02 35;
+    --muted-foreground: 0.62 0.02 55;
+
+    --accent: 0.28 0.04 45;
+    --accent-foreground: 0.95 0.01 55;
+
+    --secondary: 0.45 0.12 275;
+    --secondary-foreground: 0.95 0.01 275;
+
+    --destructive: 0.52 0.20 25;
+    --destructive-foreground: 0.95 0.01 25;
+
+    --border: 0.28 0.02 35;
+    --input: 0.28 0.02 35;
+    --ring: 0.72 0.16 35;
+
+    --popover: 0.18 0.02 35;
+    --popover-foreground: 0.95 0.01 55;
+
+    --chart-1: 0.72 0.16 35;
+    --chart-2: 0.68 0.12 155;
+    --chart-3: 0.45 0.12 275;
+    --chart-4: 0.65 0.13 195;
+    --chart-5: 0.62 0.14 55;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  /* Ripple effect for check-in animations */
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes celebrate {
+    0%, 100% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.1) rotate(-5deg);
+    }
+    75% {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  .animate-ripple {
+    animation: ripple 0.6s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.3s ease-out;
+  }
+
+  .animate-celebrate {
+    animation: celebrate 0.5s ease-in-out;
+  }
+
+  /* Touch-friendly minimum sizes */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
